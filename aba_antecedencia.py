@@ -5,10 +5,10 @@ import plotly.express as px
 def render_rota_antecedencia(df_ra_raw: pd.DataFrame):
     st.markdown("""
     <div class="pg-header">
-      <div>
-        <div class="pg-eyebrow">Acompanhamento</div>
-        <div class="pg-title">Curva por Antecedência</div>
-      </div>
+     <div>
+      <div class="pg-eyebrow">Acompanhamento</div>
+      <div class="pg-title">Curva por Antecedência - Julho</div>
+     </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -23,10 +23,10 @@ def render_rota_antecedencia(df_ra_raw: pd.DataFrame):
         return
 
     df_ra['data'] = pd.to_datetime(df_ra['data'], errors='coerce')
-    
+      
     st.markdown('<div class="section-label" style="margin-top: 0.5rem;">Selecione o Corte</div>', unsafe_allow_html=True)
     col_f1, col_f2, col_f3, col_f4 = st.columns([1, 1, 1, 1])
-    
+      
     with col_f1: 
         rota_sel = st.selectbox("Rota Principal:", options=sorted(df_ra['rota_principal'].dropna().unique()))
     with col_f2:
@@ -36,8 +36,8 @@ def render_rota_antecedencia(df_ra_raw: pd.DataFrame):
         df_sentido = df_rota[df_rota['sentido'] == sentido_sel]
         data_sel = st.selectbox("Data da Viagem:", options=sorted(df_sentido['data'].dropna().unique()), format_func=lambda x: pd.to_datetime(x).strftime('%d/%m/%Y'))
     with col_f4:
-        # Filtro Dinâmico de Referência para a Curva
-        opcoes_ref = {"Páscoa 2026": "pascoa26", "Corpus 2025": "corpus25", "Maio 2026": "maio26"}
+        # Filtro Dinâmico de Referência para a Curva (agora apenas Julho 25)
+        opcoes_ref = {"Julho 2025": "julho25"}
         ref_nome = st.selectbox("Comparar com (Ref):", list(opcoes_ref.keys()))
         sfx = opcoes_ref[ref_nome]
 
@@ -68,7 +68,7 @@ def render_rota_antecedencia(df_ra_raw: pd.DataFrame):
 
     chart_df = df_plot.copy()
     y_cols = []
-    
+      
     if metrica_grafico == "Passageiros (Pax)": y_cols = [c for c in ['pax_atual', 'pax_referencia'] if c in chart_df.columns]
     elif metrica_grafico == "Load Factor": y_cols = [c for c in ['lf_atual', 'lf_referencia'] if c in chart_df.columns]
     elif metrica_grafico == "Yield (R$)": y_cols = [c for c in ['yield_atual', 'yield_referencia'] if c in chart_df.columns]
@@ -79,7 +79,7 @@ def render_rota_antecedencia(df_ra_raw: pd.DataFrame):
     else:
         legend_rename = {y_cols[0]: "Cenário Atual"}
         if len(y_cols) > 1: legend_rename[y_cols[1]] = f"Ref ({ref_nome})"
-        
+          
         chart_df = chart_df[['antecedencia'] + y_cols].rename(columns=legend_rename)
         df_melt = chart_df.melt(id_vars='antecedencia', var_name='Cenário', value_name='Valor')
 
@@ -100,7 +100,7 @@ def render_rota_antecedencia(df_ra_raw: pd.DataFrame):
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown('<div class="section-label" style="margin-top: 2.5rem;">Tabela de Acompanhamento (Dia a Dia)</div>', unsafe_allow_html=True)
-    
+      
     col_config = {
         "antecedencia": st.column_config.NumberColumn("Dias Antec.", format="%d"),
         "pax_atual": st.column_config.NumberColumn("Pax (Atual)"),
@@ -112,10 +112,10 @@ def render_rota_antecedencia(df_ra_raw: pd.DataFrame):
         "yield_atual": st.column_config.NumberColumn("Yield (Atual)", format="R$ %.3f"),
         "yield_referencia": st.column_config.NumberColumn(f"Yield ({ref_nome})", format="R$ %.3f")
     }
-    
+      
     cols_to_show_raw = ["antecedencia", "pax_atual", "pax_referencia", "ticket_medio_atual", "ticket_medio_referencia", "lf_atual", "lf_referencia", "yield_atual", "yield_referencia"]
     cols_to_show = [c for c in cols_to_show_raw if c in df_filt.columns]
-    
+      
     st.dataframe(
         df_filt.sort_values("antecedencia", ascending=False)[cols_to_show], 
         use_container_width=True, hide_index=True, column_config=col_config
