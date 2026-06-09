@@ -12,27 +12,29 @@ import aba_historico
 # ==========================================
 # CONFIGURAÇÕES DO FERIADO E LINKS
 # ==========================================
-feriado_atual = "corpus_2026"
-ref_1 = "pascoa_2026"
+feriado_atual = "julho_2026"
 
 # DATAS ÂNCORA PARA A ABA DE RESULTADOS
-data_ancora_ida = "2026-06-03" 
-data_ancora_volta = "2026-06-07" 
+data_ancora_ida = "2026-07-03"    # Sexta-feira
+data_ancora_volta = "2026-07-26"  # Domingo
 
-# LINKS DO GITHUB PADRONIZADOS NO REPOSITÓRIO '123'
-GITHUB_RAW_CURVA = f"https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Corpus-Christi123/main/data/curva_{feriado_atual}.csv"
-GITHUB_RAW_GERAL = f"https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Corpus-Christi123/main/data/resultados_geral_{feriado_atual}.csv"
-GITHUB_RAW_DIA = f"https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Corpus-Christi123/main/data/resultados_dia_{feriado_atual}.csv"
-GITHUB_RAW_ROTA = f"https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Corpus-Christi123/main/data/resultados_rota_antecedencia_{feriado_atual}.csv"
+# Nome exato do repositório onde os dados de Julho foram salvos
+NOME_REPO = "Resultados-Julho"
 
-# LINKS REGIONAIS DO SEU DATABRICKS NO REPOSITÓRIO '123'
-GITHUB_RAW_REG_GERAL = f"https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Corpus-Christi123/main/data/resultados_regional_geral_{feriado_atual}.csv"
-GITHUB_RAW_REG_DIA = f"https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Corpus-Christi123/main/data/resultados_regional_dia_{feriado_atual}.csv"
-GITHUB_RAW_REG_ROTA = f"https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Corpus-Christi123/main/data/resultados_regional_rota_{feriado_atual}.csv"
+# LINKS DO GITHUB PADRONIZADOS
+GITHUB_RAW_CURVA = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data/curva_{feriado_atual}.csv"
+GITHUB_RAW_GERAL = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data/resultados_geral_{feriado_atual}.csv"
+GITHUB_RAW_DIA = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data/resultados_dia_{feriado_atual}.csv"
+GITHUB_RAW_ROTA = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data/resultados_rota_antecedencia_{feriado_atual}.csv"
+
+# LINKS REGIONAIS DO SEU DATABRICKS
+GITHUB_RAW_REG_GERAL = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data/resultados_regional_geral_{feriado_atual}.csv"
+GITHUB_RAW_REG_DIA = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data/resultados_regional_dia_{feriado_atual}.csv"
+GITHUB_RAW_REG_ROTA = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data/resultados_regional_rota_{feriado_atual}.csv"
 # ==========================================
 
 st.set_page_config(
-    page_title="Pricing · Corpus Christi",
+    page_title="Pricing · Julho", # Atualizei o título da aba do navegador também!
     layout="wide",
     initial_sidebar_state="expanded"
 )
