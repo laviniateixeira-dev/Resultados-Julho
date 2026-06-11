@@ -211,7 +211,9 @@ with st.sidebar:
         st.cache_data.clear()
         st.rerun()
 
-    df_unified = load_unified(GITHUB_RAW_UNIFIED)
+    st.write("Linhas carregadas:", len(df_unified))
+st.write(df_unified.head())
+st.write(df_unified.columns.tolist())
 
     (
         df_geral_raw,
