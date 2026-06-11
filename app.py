@@ -20,18 +20,11 @@ data_ancora_ida = "2026-07-03"    # Sexta-feira
 data_ancora_volta = "2026-07-26"  # Domingo
 
 # ==========================================
-# LINKS DO GITHUB EXATOS CONFORME O DATABRICKS
+# ÚNICO CSV UNIFICADO GERADO PELO NOTEBOOK
+# (repositório: Resultados-julho, com j minúsculo)
 # ==========================================
+GITHUB_RAW_UNIFIED = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-julho/main/data/julho_2026_resultados.csv"
 
-GITHUB_RAW_GERAL      = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_geral_julho_2026.csv"
-GITHUB_RAW_DIA        = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_dia_julho_2026.csv"
-GITHUB_RAW_ROTA       = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_rota_antecedencia_julho_2026.csv"
-GITHUB_RAW_ALTERACOES = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/alteracoes_julho_2026.csv"
-
-# LINKS REGIONAIS EXATOS NO APP.PY
-GITHUB_RAW_REG_GERAL  = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_regional_geral_julho_2026.csv"
-GITHUB_RAW_REG_DIA    = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_regional_dia_julho_2026.csv"
-GITHUB_RAW_REG_ROTA   = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_regional_rota_julho_2026.csv"
 # ==========================================
 
 st.set_page_config(
@@ -64,7 +57,6 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stAppViewBlockCont
 [data-testid="stSidebar"] { background-color: var(--bg-card) !important; border-right: 1px solid var(--bdr) !important; }
 .block-container { padding: 3rem 4rem !important; max-width: 100% !important; }
 
-/* Inputs Padrão */
 [data-testid="stTextInput"] input, [data-testid="stSelectbox"] [data-baseweb="select"] > div {
   background-color: #26111A !important; border: 1px solid #401B2B !important; border-radius: 4px !important; color: var(--buser) !important;
 }
@@ -72,12 +64,10 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stAppViewBlockCont
   border-color: var(--buser) !important;
 }
 
-/* Abas */
 [data-testid="stTabs"] [data-baseweb="tab-list"] { border-bottom: 2px solid var(--bdr) !important; gap: 20px !important; }
 [data-testid="stTabs"] [data-baseweb="tab"] { color: var(--ink-muted) !important; font-weight: 500 !important; border: none !important; border-bottom: 3px solid transparent !important; }
 [data-testid="stTabs"] [aria-selected="true"][data-baseweb="tab"] { color: var(--buser) !important; border-bottom-color: var(--buser) !important; }
 
-/* Tipografia */
 .pg-header { display: flex; align-items: flex-end; justify-content: space-between; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--bdr); }
 .pg-eyebrow { font-size: .75rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--buser); margin-bottom: 8px; }
 .pg-title { font-family: 'DM Serif Display', serif; font-size: 2.5rem; font-weight: 400; line-height: 1.1; }
@@ -86,7 +76,6 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stAppViewBlockCont
 
 [data-testid="stDataTable"] { border: 1px solid var(--bdr) !important; border-radius: 8px !important; overflow: hidden !important; }
 
-/* Dropdowns abertos */
 [data-baseweb="popover"] [data-baseweb="menu"] {
   background-color: var(--bg-card) !important;
   border: 1px solid var(--bdr) !important;
@@ -97,49 +86,214 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stAppViewBlockCont
 </style>
 """, unsafe_allow_html=True)
 
-# --- FUNÇÃO PADRONIZADA DE CARREGAMENTO DE DADOS ---
+
+# ==========================================
+# CARREGAMENTO E SPLIT DO CSV UNIFICADO
+# ==========================================
 @st.cache_data(ttl=60)
-def load_data(url: str) -> pd.DataFrame:
+def load_unified(url: str) -> pd.DataFrame:
+    """Baixa o CSV unificado gerado pelo notebook e padroniza colunas."""
     try:
-        # Adicionando um timestamp dinâmico para "enganar" o cache do GitHub
-        cache_buster_url = f"{url}?t={int(time.time())}"
-        
-        r = requests.get(cache_buster_url, timeout=15)
+        cache_buster = f"{url}?t={int(time.time())}"
+        r = requests.get(cache_buster, timeout=15)
         r.raise_for_status()
         df = pd.read_csv(io.StringIO(r.text))
         df.columns = [str(c).lower().strip() for c in df.columns]
-        
-        for col_date in ['data_atual', 'data_viagem', 'dt_ida', 'date_ida', f'data_{feriado_atual}']:
-            if col_date in df.columns:
-                df.rename(columns={col_date: 'data'}, inplace=True)
-                
-        if 'eixo_sentido' in df.columns:
-            df.rename(columns={'eixo_sentido': 'sentido'}, inplace=True)
-            
         return df
     except Exception as e:
-        st.error(f"Erro na url: {url} | Detalhe: {e}")
+        st.error(f"Erro ao carregar CSV unificado: {e}")
         return pd.DataFrame()
 
-# --- SIDEBAR (CONTROLE DE CACHE) ---
+
+def split_dataframes(df: pd.DataFrame):
+    """
+    Divide o CSV unificado nas 7 bases esperadas pelas abas,
+    filtrando pela coluna 'granularidade' (gerada pelo notebook).
+
+    granularidade          → destino
+    ─────────────────────────────────────────────────────────
+    consolidado            → df_geral       (aba Resultados)
+    dia_viagem             → df_dia         (aba Resultados)
+    rota_antecedencia      → df_rota        (aba Antecedência e Regional)
+    regional_slot          → df_reg_geral   (aba Regionais)
+    precificacao           → df_alteracoes  (aba Histórico)
+    """
+    if df.empty:
+        empty = pd.DataFrame()
+        return empty, empty, empty, empty, empty, empty, empty
+
+    def filtra(granularidade_val):
+        sub = df[df.get('granularidade', pd.Series(dtype=str)) == granularidade_val].copy()
+        return sub
+
+    # ── Aba Resultados ────────────────────────────────────────────
+    # Consolidado mês → pivot para formato {metrica, julho_2025, atual}
+    df_geral_raw = filtra('consolidado')
+    df_dia_raw   = filtra('dia_viagem')
+
+    df_geral = _pivot_resultado(df_geral_raw)
+    df_dia   = _pivot_resultado_dia(df_dia_raw)
+
+    # ── Aba Antecedência ──────────────────────────────────────────
+    df_rota = _reshape_antecedencia(filtra('rota_antecedencia'))
+
+    # ── Aba Regionais ─────────────────────────────────────────────
+    df_reg_geral = _pivot_regional_geral(filtra('regional_slot'))
+    df_reg_dia   = pd.DataFrame()   # não usado pelas abas (passado mas não renderizado)
+    df_reg_rota  = _reshape_regional_rota(filtra('rota_antecedencia'))
+
+    # ── Aba Histórico ─────────────────────────────────────────────
+    df_alteracoes = _reshape_alteracoes(filtra('precificacao'))
+
+    return df_geral, df_dia, df_rota, df_reg_geral, df_reg_dia, df_reg_rota, df_alteracoes
+
+
+# ── helpers de reshape ────────────────────────────────────────────────────────
+
+def _pivot_resultado(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Transforma linhas do CSV unificado (consolidado) no formato que
+    aba_resultados.render_resultados espera: colunas [metrica, julho_2025, atual].
+    """
+    if df.empty:
+        return df
+    out = df[['metrica', 'valor_historico', 'valor_atual']].copy()
+    out.rename(columns={'valor_historico': 'julho_2025', 'valor_atual': 'atual'}, inplace=True)
+    return out
+
+
+def _pivot_resultado_dia(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Mesmo pivot que _pivot_resultado, mas inclui coluna 'data' (data_atual).
+    """
+    if df.empty:
+        return df
+    cols = ['data_atual', 'metrica', 'valor_historico', 'valor_atual']
+    cols_ok = [c for c in cols if c in df.columns]
+    out = df[cols_ok].copy()
+    out.rename(columns={
+        'data_atual': 'data',
+        'valor_historico': 'julho_2025',
+        'valor_atual': 'atual'
+    }, inplace=True)
+    return out
+
+
+def _reshape_antecedencia(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Transforma o bloco rota_antecedencia no formato esperado por
+    aba_antecedencia.render_rota_antecedencia:
+    colunas: data, rota_principal, sentido, antecedencia,
+             pax_atual, pax_julho25, lf_atual, lf_julho25,
+             yield_atual, yield_julho25, ticket_medio_atual, ticket_medio_julho25
+    """
+    if df.empty:
+        return df
+
+    col_map = {
+        'data_atual': 'data',
+        'eixo_sentido': 'sentido',
+        'pax_atual': 'pax_atual',
+        'pax_historico': 'pax_julho25',
+        'lf_atual': 'lf_atual',
+        'lf_historico': 'lf_julho25',
+        'yield_atual': 'yield_atual',
+        'yield_historico': 'yield_julho25',
+        'ticket_medio_atual': 'ticket_medio_atual',
+        'ticket_medio_historico': 'ticket_medio_julho25',
+        'grupos_atual': 'grupos_atual',
+        'grupos_historico': 'grupos_historico',
+        'gmv_atual': 'gmv_atual',
+    }
+    out = df.rename(columns={k: v for k, v in col_map.items() if k in df.columns})
+
+    # aba_antecedencia usa sufixo 'julho25' no rename_mapping
+    out.rename(columns={
+        'pax_julho25': 'pax_julho25',
+        'lf_julho25': 'lf_julho25',
+        'yield_julho25': 'yield_julho25',
+        'ticket_medio_julho25': 'ticket_medio_julho25',
+    }, inplace=True)
+
+    return out
+
+
+def _pivot_regional_geral(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Transforma bloco regional_slot no formato esperado por aba_regionais:
+    colunas: regional, slot, metrica, julho_2025, atual
+    """
+    if df.empty:
+        return df
+    cols = ['regional', 'slot', 'metrica', 'valor_historico', 'valor_atual']
+    cols_ok = [c for c in cols if c in df.columns]
+    out = df[cols_ok].copy()
+    out.rename(columns={'valor_historico': 'julho_2025', 'valor_atual': 'atual'}, inplace=True)
+    return out
+
+
+def _reshape_regional_rota(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Filtra apenas linhas com regional preenchido (regional_slot tem regional/slot)
+    e retorna no formato esperado por aba_regionais para detalhamento por rota.
+    """
+    if df.empty:
+        return df
+    if 'regional' not in df.columns:
+        return df
+    out = df[df['regional'].notna()].copy()
+    col_map = {
+        'data_atual': 'data',
+        'eixo_sentido': 'sentido',
+        'pax_atual': 'pax_atual',
+        'grupos_atual': 'grupos_atual',
+        'ticket_medio_atual': 'ticket_medio_atual',
+        'lf_atual': 'lf_atual',
+        'gmv_atual': 'gmv_atual',
+    }
+    out.rename(columns={k: v for k, v in col_map.items() if k in out.columns}, inplace=True)
+    return out
+
+
+def _reshape_alteracoes(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Retorna o bloco de precificação no formato esperado por aba_historico.
+    """
+    if df.empty:
+        return df
+    col_map = {
+        'data_atual': 'data',
+        'eixo_sentido': 'sentido',
+    }
+    out = df.rename(columns={k: v for k, v in col_map.items() if k in df.columns})
+    return out
+
+
+# ==========================================
+# SIDEBAR — controle de cache + carregamento
+# ==========================================
 with st.sidebar:
     st.markdown('<div class="section-label" style="margin-top:0;">Controle de Dados</div>', unsafe_allow_html=True)
     if st.button("Atualizar Cache dos Dados", use_container_width=True):
         st.cache_data.clear()
         st.rerun()
 
-    # Carregamento das bases globais
-    df_alteracoes_raw = load_data(GITHUB_RAW_ALTERACOES)
-    df_geral_raw = load_data(GITHUB_RAW_GERAL)
-    df_dia_raw = load_data(GITHUB_RAW_DIA)
-    df_rota_raw = load_data(GITHUB_RAW_ROTA)
-    
-    # Carregamento das novas bases regionais
-    df_reg_geral_raw = load_data(GITHUB_RAW_REG_GERAL)
-    df_reg_dia_raw = load_data(GITHUB_RAW_REG_DIA)
-    df_reg_rota_raw = load_data(GITHUB_RAW_REG_ROTA)
+    df_unified = load_unified(GITHUB_RAW_UNIFIED)
 
-# --- ESTRUTURA DE ABAS ---
+    (
+        df_geral_raw,
+        df_dia_raw,
+        df_rota_raw,
+        df_reg_geral_raw,
+        df_reg_dia_raw,
+        df_reg_rota_raw,
+        df_alteracoes_raw,
+    ) = split_dataframes(df_unified)
+
+
+# ==========================================
+# ESTRUTURA DE ABAS
+# ==========================================
 tab1, tab2, tab3, tab4 = st.tabs([
     "Resultados", 
     "Resultados Regionais", 
@@ -147,7 +301,6 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "Histórico Alterações de Preço"
 ])
 
-# --- RENDERIZAÇÃO DAS ABAS ---
 with tab1: 
     aba_resultados.render_resultados(df_geral_raw, df_dia_raw, feriado_atual, data_ancora_ida, data_ancora_volta)
 
