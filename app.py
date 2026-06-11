@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import io
+import time
 
 # Importando os arquivos de abas
 import aba_resultados
@@ -97,15 +98,21 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stAppViewBlockCont
 @st.cache_data(ttl=60)
 def load_data(url: str) -> pd.DataFrame:
     try:
-        r = requests.get(url, timeout=15)
+        # Adicionando um timestamp dinâmico para "enganar" o cache do GitHub
+        cache_buster_url = f"{url}?t={int(time.time())}"
+        
+        r = requests.get(cache_buster_url, timeout=15)
         r.raise_for_status()
         df = pd.read_csv(io.StringIO(r.text))
         df.columns = [str(c).lower().strip() for c in df.columns]
+        
         for col_date in ['data_atual', 'data_viagem', 'dt_ida', 'date_ida', f'data_{feriado_atual}']:
             if col_date in df.columns:
                 df.rename(columns={col_date: 'data'}, inplace=True)
+                
         if 'eixo_sentido' in df.columns:
             df.rename(columns={'eixo_sentido': 'sentido'}, inplace=True)
+            
         return df
     except Exception as e:
         st.error(f"Erro na url: {url} | Detalhe: {e}")
