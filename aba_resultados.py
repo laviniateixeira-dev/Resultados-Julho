@@ -41,7 +41,7 @@ def render_resultados(df_g_raw: pd.DataFrame, df_d_raw: pd.DataFrame, feriado_at
     col_t, col_f1, col_f2 = st.columns([2, 1, 1])
       
     with col_f1:
-        # Mantém apenas o Consolidado e depois adiciona os dias unitários
+        # Traz apenas o 'Consolidado Mês' e as datas isoladas (sem agrupamentos soltos)
         opcoes_data = ["Consolidado Mês"]
         if 'data' in df_d.columns:
             opcoes_data.extend(sorted(df_d['data'].dropna().unique()))
