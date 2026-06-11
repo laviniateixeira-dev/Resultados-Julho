@@ -1,0 +1,55 @@
+output_label,periodo_historico,periodo_atual,secao,regional,slot,metrica,julho_2025,atual
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,extra,01. RASK,,0.0029630271781682983
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,extra,02. Yield,,0.23759240869469272
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,extra,03. Grupos Realizados,,28.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,extra,04. Pax Total,,17.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,extra,05. ASK,,726723.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,extra,06. RPK,,9063.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,extra,07. Load Factor,,0.012471051556094964
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,extra,08. Ticket Médio,,126.66470588235295
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,extra,09. GMV,,2153.3
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,fixo,01. RASK,0.01489115181270939,0.017362909208409605
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,fixo,02. Yield,0.22506173697208876,0.23320378009649478
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,fixo,03. Grupos Realizados,3379.0,4820.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,fixo,04. Pax Total,10452.0,15904.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,fixo,05. ASK,90348404.0,124929434.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,fixo,06. RPK,5800738.0,9034690.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,fixo,07. Load Factor,0.06420410038455134,0.07231834573107887
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,fixo,08. Ticket Médio,124.90663700727133,132.4776068913481
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,fixo,09. GMV,1345391.8000000003,2169138.42
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,geral,01. RASK,0.014955375716448205,0.017151354893814853
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,geral,02. Yield,0.22412770394193504,0.23314394991081358
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,geral,03. Grupos Realizados,3431.0,4914.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,geral,04. Pax Total,10711.0,15975.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,geral,05. ASK,91876321.0,126812041.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,geral,06. RPK,5951265.0,9061916.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,geral,07. Load Factor,0.0647747421231636,0.07145942868311693
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,geral,08. Ticket Médio,124.53023620576978,132.2523248826291
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. MG,geral,09. GMV,1374044.9,2174998.32
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,extra,01. RASK,0.0011091242619968862,0.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,extra,02. Yield,0.26068840579710145,
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,extra,03. Grupos Realizados,11.0,12.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,extra,04. Pax Total,2.0,0.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,extra,05. ASK,259484.0,292710.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,extra,06. RPK,1104.0,0.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,extra,07. Load Factor,0.004254597585978326,0.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,extra,08. Ticket Médio,143.9,
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,extra,09. GMV,287.8,0.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,fixo,01. RASK,0.010842538364062885,0.011537685655490732
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,fixo,02. Yield,0.19268040486256804,0.21236131522466026
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,fixo,03. Grupos Realizados,4334.0,6255.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,fixo,04. Pax Total,10449.0,12953.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,fixo,05. ASK,97823320.0,126897607.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,fixo,06. RPK,5368439.0,6682691.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,fixo,07. Load Factor,0.05487892866445342,0.05266207265831262
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,fixo,08. Ticket Médio,98.99444922959135,109.56110939550685
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,fixo,09. GMV,1060653.1,1464104.7
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,geral,01. RASK,0.010705125892559824,0.01147461452374555
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,geral,02. Yield,0.1926991435106177,0.21277980256755433
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,geral,03. Grupos Realizados,4386.0,6451.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,geral,04. Pax Total,10453.0,13004.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,geral,05. ASK,99123888.0,128008274.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,geral,06. RPK,5370411.0,6691504.0
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,geral,07. Load Factor,0.05417877676468865,0.05227399597622885
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,geral,08. Ticket Médio,99.00254472400269,109.49068748077515
+julho_2026,julho_2025,julho_2026,regional_slot,Reg. SP,geral,09. GMV,1061133.7,1468845.6
