@@ -19,9 +19,9 @@ LBL = "julho_2026_resultados" # Label exato gerado pelo Databricks
 data_ancora_ida = "2026-07-03"    # Sexta-feira
 data_ancora_volta = "2026-07-26"  # Domingo
 
-# Nome exato do repositório onde os dados de Julho foram salvos
-NOME_REPO = "Resultados-Julho"
-BASE_URL = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data"
+# Caminho completo do repositório
+REPO_COMPLETO = "laviniateixeira-dev/Resultados-Julho"
+BASE_URL = f"https://raw.githubusercontent.com/{REPO_COMPLETO}/main/data"
 
 # LINKS DO GITHUB PADRONIZADOS COM O DATABRICKS
 GITHUB_RAW_GERAL      = f"{BASE_URL}/resultados_geral_{LBL}.csv"
