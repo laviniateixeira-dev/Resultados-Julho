@@ -15,10 +15,6 @@ import aba_historico
 # ==========================================
 feriado_atual = "julho_2026"
 
-# DATAS ÂNCORA PARA A ABA DE RESULTADOS
-data_ancora_ida = "2026-07-03"    # Sexta-feira
-data_ancora_volta = "2026-07-26"  # Domingo
-
 # ==========================================
 # LINKS DOS CSVs E AUTENTICAÇÃO GITHUB
 # ==========================================
@@ -27,11 +23,11 @@ GH_TOKEN_LEITURA = "COLOQUE_SEU_NOVO_TOKEN_AQUI"
 
 BASE_URL = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/"
 
-URL_GERAL = f"{BASE_URL}julho_2026_resultado_geral.csv"
-URL_DIA = f"{BASE_URL}julho_2026_resultado_por_dia.csv"
-URL_ANTECEDENCIA = f"{BASE_URL}julho_2026_curva_antecedencia.csv"
-URL_ALTERACOES = f"{BASE_URL}julho_2026_alteracoes_preco.csv"
-URL_REG_SLOT = f"{BASE_URL}julho_2026_regional_slot.csv"
+URL_GERAL = https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/julho_2026_resultado_geral.csv
+URL_DIA = https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/julho_2026_resultado_por_dia.csv
+URL_ANTECEDENCIA = https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/julho_2026_curva_antecedencia.csv
+URL_ALTERACOES = https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/julho_2026_alteracoes_preco.csv
+URL_REG_SLOT = https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/julho_2026_regional_slot.csv
 
 # ==========================================
 # CONFIGURAÇÃO DA PÁGINA E CSS
