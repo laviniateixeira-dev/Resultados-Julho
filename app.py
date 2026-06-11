@@ -20,12 +20,19 @@ data_ancora_ida = "2026-07-03"    # Sexta-feira
 data_ancora_volta = "2026-07-26"  # Domingo
 
 # ==========================================
-# ÚNICO CSV UNIFICADO GERADO PELO NOTEBOOK
+# LINKS DOS CSVs (GERADOS PELO DATABRICKS)
 # ==========================================
-GITHUB_RAW_UNIFIED = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-julho/main/data/julho_2026_resultados.csv"
+BASE_URL = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/"
+
+URL_GERAL = f"{BASE_URL}julho_2026_resultado_geral.csv"
+URL_DIA = f"{BASE_URL}julho_2026_resultado_por_dia.csv"
+URL_ANTECEDENCIA = f"{BASE_URL}julho_2026_curva_antecedencia.csv"
+URL_ALTERACOES = f"{BASE_URL}julho_2026_alteracoes_preco.csv"
+URL_REG_SLOT = f"{BASE_URL}julho_2026_regional_slot.csv"
 
 # ==========================================
-
+# CONFIGURAÇÃO DA PÁGINA E CSS
+# ==========================================
 st.set_page_config(
     page_title="Pricing · Julho", 
     layout="wide",
@@ -87,61 +94,22 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stAppViewBlockCont
 
 
 # ==========================================
-# CARREGAMENTO E SPLIT DO CSV UNIFICADO
+# FUNÇÕES DE CARREGAMENTO E RESHAPE
 # ==========================================
 @st.cache_data(ttl=60)
-def load_unified(url: str) -> pd.DataFrame:
-    """Baixa o CSV unificado gerado pelo notebook e padroniza colunas."""
+def load_csv(url: str) -> pd.DataFrame:
+    """Baixa o CSV e padroniza as colunas."""
     try:
         cache_buster = f"{url}?t={int(time.time())}"
         r = requests.get(cache_buster, timeout=15)
         r.raise_for_status()
         df = pd.read_csv(io.StringIO(r.text))
         df.columns = [str(c).lower().strip() for c in df.columns]
-        # NOTA: Removido o renomeamento em lote aqui para não criar colunas 'data' duplicadas.
         return df
     except Exception as e:
-        st.error(f"Erro ao carregar CSV unificado: {e}")
+        st.error(f"Erro ao carregar {url.split('/')[-1]}: {e}")
         return pd.DataFrame()
 
-
-def split_dataframes(df: pd.DataFrame):
-    if df.empty:
-        empty = pd.DataFrame()
-        return empty, empty, empty, empty, empty, empty, empty
-
-    def filtra(granularidade_val):
-        return df[df.get('granularidade', pd.Series(dtype=str)) == granularidade_val].copy()
-
-    # Filtros base
-    df_geral_raw      = filtra('consolidado')
-    df_dia_raw        = filtra('dia_viagem')
-    df_reg_geral_raw  = filtra('regional_slot')
-    df_alteracoes_raw = filtra('precificacao')
-
-    # Correção: Curva global e regional dividem a mesma granularidade no Databricks. 
-    # Precisamos separá-las olhando se a coluna "regional" está nula ou não.
-    df_curvas = filtra('rota_antecedencia')
-    if 'regional' in df_curvas.columns:
-        df_rota_raw = df_curvas[df_curvas['regional'].isna()].copy()
-        df_reg_rota_raw = df_curvas[df_curvas['regional'].notna()].copy()
-    else:
-        df_rota_raw = df_curvas.copy()
-        df_reg_rota_raw = pd.DataFrame()
-
-    # Aplicação dos reshapes exatos
-    df_geral      = _pivot_resultado(df_geral_raw)
-    df_dia        = _pivot_resultado_dia(df_dia_raw)
-    df_rota       = _reshape_antecedencia(df_rota_raw)
-    df_reg_geral  = _pivot_regional_geral(df_reg_geral_raw)
-    df_reg_dia    = pd.DataFrame()  # não usado pelas abas
-    df_reg_rota   = _reshape_regional_rota(df_reg_rota_raw)
-    df_alteracoes = _reshape_alteracoes(df_alteracoes_raw)
-
-    return df_geral, df_dia, df_rota, df_reg_geral, df_reg_dia, df_reg_rota, df_alteracoes
-
-
-# ── helpers de reshape ────────────────────────────────────────────────────────
 
 def _pivot_resultado(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty: return df
@@ -166,7 +134,7 @@ def _pivot_resultado_dia(df: pd.DataFrame) -> pd.DataFrame:
 def _reshape_antecedencia(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty: return df
     col_map = {
-        'data_julho_2026': 'data', # ← O Databricks exporta com este nome
+        'data_julho_2026': 'data',
         'eixo_sentido': 'sentido',
         'pax_historico': 'pax_julho25',
         'lf_historico': 'lf_julho25',
@@ -188,22 +156,17 @@ def _pivot_regional_geral(df: pd.DataFrame) -> pd.DataFrame:
 
 def _reshape_regional_rota(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty: return df
-    col_map = {
-        'eixo_sentido': 'sentido'
-        # Nota: 'data' já vem com o nome correto do Databricks na query_regional_rota
-    }
+    col_map = {'eixo_sentido': 'sentido'}
     out = df.rename(columns={k: v for k, v in col_map.items() if k in df.columns})
     return out
 
 
 def _reshape_alteracoes(df: pd.DataFrame) -> pd.DataFrame:
-    # Retorna o df puro porque a aba_historico.py já faz a inteligência de procurar
-    # as colunas com os nomes nativos do Databricks ('data_atual' e 'sentido').
     return df
 
 
 # ==========================================
-# SIDEBAR — controle de cache + carregamento
+# SIDEBAR — CONTROLE DE DADOS
 # ==========================================
 with st.sidebar:
     st.markdown('<div class="section-label" style="margin-top:0;">Controle de Dados</div>', unsafe_allow_html=True)
@@ -211,19 +174,31 @@ with st.sidebar:
         st.cache_data.clear()
         st.rerun()
 
-    st.write("Linhas carregadas:", len(df_unified))
-st.write(df_unified.head())
-st.write(df_unified.columns.tolist())
+    # 1. Carrega os DataFrames brutos das URLs
+    raw_geral      = load_csv(URL_GERAL)
+    raw_dia        = load_csv(URL_DIA)
+    raw_curvas     = load_csv(URL_ANTECEDENCIA)
+    raw_alteracoes = load_csv(URL_ALTERACOES)
+    raw_reg_geral  = load_csv(URL_REG_SLOT)
 
-    (
-        df_geral_raw,
-        df_dia_raw,
-        df_rota_raw,
-        df_reg_geral_raw,
-        df_reg_dia_raw,
-        df_reg_rota_raw,
-        df_alteracoes_raw,
-    ) = split_dataframes(df_unified)
+    # 2. Separa a curva global da regional
+    if not raw_curvas.empty and 'regional' in raw_curvas.columns:
+        raw_rota     = raw_curvas[raw_curvas['regional'].isna()].copy()
+        raw_reg_rota = raw_curvas[raw_curvas['regional'].notna()].copy()
+    else:
+        raw_rota     = raw_curvas.copy()
+        raw_reg_rota = pd.DataFrame()
+
+    raw_reg_dia = pd.DataFrame() # Não usado no momento pelas abas
+
+    # 3. Aplica os reshapes e mantém os nomes de variáveis esperados pelas abas
+    df_geral_raw      = _pivot_resultado(raw_geral)
+    df_dia_raw        = _pivot_resultado_dia(raw_dia)
+    df_rota_raw       = _reshape_antecedencia(raw_rota)
+    df_reg_geral_raw  = _pivot_regional_geral(raw_reg_geral)
+    df_reg_dia_raw    = raw_reg_dia 
+    df_reg_rota_raw   = _reshape_regional_rota(raw_reg_rota)
+    df_alteracoes_raw = _reshape_alteracoes(raw_alteracoes)
 
 
 # ==========================================
