@@ -20,8 +20,11 @@ data_ancora_ida = "2026-07-03"    # Sexta-feira
 data_ancora_volta = "2026-07-26"  # Domingo
 
 # ==========================================
-# LINKS DOS CSVs (GERADOS PELO DATABRICKS)
+# LINKS DOS CSVs E AUTENTICAÇÃO GITHUB
 # ==========================================
+# Cole o seu NOVO token gerado no GitHub aqui (com permissão de leitura do repositório)
+GH_TOKEN_LEITURA = "COLOQUE_SEU_NOVO_TOKEN_AQUI"
+
 BASE_URL = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/"
 
 URL_GERAL = f"{BASE_URL}julho_2026_resultado_geral.csv"
@@ -97,17 +100,22 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stAppViewBlockCont
 # FUNÇÕES DE CARREGAMENTO E RESHAPE
 # ==========================================
 @st.cache_data(ttl=60)
-def load_csv(url: str) -> pd.DataFrame:
-    """Baixa o CSV e padroniza as colunas."""
+def load_csv(url: str, token: str = "") -> pd.DataFrame:
+    """Descarrega o CSV e padroniza as colunas, com suporte a repositórios privados."""
     try:
+        headers = {}
+        if token:
+            headers["Authorization"] = f"token {token}"
+            
         cache_buster = f"{url}?t={int(time.time())}"
-        r = requests.get(cache_buster, timeout=15)
-        r.raise_for_status()
+        r = requests.get(cache_buster, headers=headers, timeout=15)
+        r.raise_for_status() 
+        
         df = pd.read_csv(io.StringIO(r.text))
         df.columns = [str(c).lower().strip() for c in df.columns]
         return df
     except Exception as e:
-        st.error(f"Erro ao carregar {url.split('/')[-1]}: {e}")
+        st.error(f"Erro ao acessar {url.split('/')[-1]}: {e}")
         return pd.DataFrame()
 
 
@@ -174,12 +182,12 @@ with st.sidebar:
         st.cache_data.clear()
         st.rerun()
 
-    # 1. Carrega os DataFrames brutos das URLs
-    raw_geral      = load_csv(URL_GERAL)
-    raw_dia        = load_csv(URL_DIA)
-    raw_curvas     = load_csv(URL_ANTECEDENCIA)
-    raw_alteracoes = load_csv(URL_ALTERACOES)
-    raw_reg_geral  = load_csv(URL_REG_SLOT)
+    # 1. Carrega os DataFrames brutos das URLs passando a autenticação
+    raw_geral      = load_csv(URL_GERAL, GH_TOKEN_LEITURA)
+    raw_dia        = load_csv(URL_DIA, GH_TOKEN_LEITURA)
+    raw_curvas     = load_csv(URL_ANTECEDENCIA, GH_TOKEN_LEITURA)
+    raw_alteracoes = load_csv(URL_ALTERACOES, GH_TOKEN_LEITURA)
+    raw_reg_geral  = load_csv(URL_REG_SLOT, GH_TOKEN_LEITURA)
 
     # 2. Separa a curva global da regional
     if not raw_curvas.empty and 'regional' in raw_curvas.columns:
