@@ -25,7 +25,7 @@ GITHUB_RAW_DIA        = "https://raw.githubusercontent.com/laviniateixeira-dev/R
 GITHUB_RAW_ROTA       = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_rota_antecedencia_julho_2026_resultados.csv"
 GITHUB_RAW_ALTERACOES = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/alteracoes_julho_2026_resultados.csv"
 
-# LINKS REGIONAIS EXATOS
+# LINKS REGIONAIS EXATOS NO APP.PY
 GITHUB_RAW_REG_GERAL  = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_regional_geral_julho_2026_resultados.csv"
 GITHUB_RAW_REG_DIA    = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_regional_dia_julho_2026_resultados.csv"
 GITHUB_RAW_REG_ROTA   = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_regional_rota_julho_2026_resultados.csv"
