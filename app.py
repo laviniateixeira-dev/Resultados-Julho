@@ -21,7 +21,6 @@ data_ancora_volta = "2026-07-26"  # Domingo
 
 # ==========================================
 # ÚNICO CSV UNIFICADO GERADO PELO NOTEBOOK
-# (repositório: Resultados-julho, com j minúsculo)
 # ==========================================
 GITHUB_RAW_UNIFIED = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-julho/main/data/julho_2026_resultados.csv"
 
@@ -99,6 +98,7 @@ def load_unified(url: str) -> pd.DataFrame:
         r.raise_for_status()
         df = pd.read_csv(io.StringIO(r.text))
         df.columns = [str(c).lower().strip() for c in df.columns]
+        # NOTA: Removido o renomeamento em lote aqui para não criar colunas 'data' duplicadas.
         return df
     except Exception as e:
         st.error(f"Erro ao carregar CSV unificado: {e}")
@@ -106,44 +106,37 @@ def load_unified(url: str) -> pd.DataFrame:
 
 
 def split_dataframes(df: pd.DataFrame):
-    """
-    Divide o CSV unificado nas 7 bases esperadas pelas abas,
-    filtrando pela coluna 'granularidade' (gerada pelo notebook).
-
-    granularidade          → destino
-    ─────────────────────────────────────────────────────────
-    consolidado            → df_geral       (aba Resultados)
-    dia_viagem             → df_dia         (aba Resultados)
-    rota_antecedencia      → df_rota        (aba Antecedência e Regional)
-    regional_slot          → df_reg_geral   (aba Regionais)
-    precificacao           → df_alteracoes  (aba Histórico)
-    """
     if df.empty:
         empty = pd.DataFrame()
         return empty, empty, empty, empty, empty, empty, empty
 
     def filtra(granularidade_val):
-        sub = df[df.get('granularidade', pd.Series(dtype=str)) == granularidade_val].copy()
-        return sub
+        return df[df.get('granularidade', pd.Series(dtype=str)) == granularidade_val].copy()
 
-    # ── Aba Resultados ────────────────────────────────────────────
-    # Consolidado mês → pivot para formato {metrica, julho_2025, atual}
-    df_geral_raw = filtra('consolidado')
-    df_dia_raw   = filtra('dia_viagem')
+    # Filtros base
+    df_geral_raw      = filtra('consolidado')
+    df_dia_raw        = filtra('dia_viagem')
+    df_reg_geral_raw  = filtra('regional_slot')
+    df_alteracoes_raw = filtra('precificacao')
 
-    df_geral = _pivot_resultado(df_geral_raw)
-    df_dia   = _pivot_resultado_dia(df_dia_raw)
+    # Correção: Curva global e regional dividem a mesma granularidade no Databricks. 
+    # Precisamos separá-las olhando se a coluna "regional" está nula ou não.
+    df_curvas = filtra('rota_antecedencia')
+    if 'regional' in df_curvas.columns:
+        df_rota_raw = df_curvas[df_curvas['regional'].isna()].copy()
+        df_reg_rota_raw = df_curvas[df_curvas['regional'].notna()].copy()
+    else:
+        df_rota_raw = df_curvas.copy()
+        df_reg_rota_raw = pd.DataFrame()
 
-    # ── Aba Antecedência ──────────────────────────────────────────
-    df_rota = _reshape_antecedencia(filtra('rota_antecedencia'))
-
-    # ── Aba Regionais ─────────────────────────────────────────────
-    df_reg_geral = _pivot_regional_geral(filtra('regional_slot'))
-    df_reg_dia   = pd.DataFrame()   # não usado pelas abas (passado mas não renderizado)
-    df_reg_rota  = _reshape_regional_rota(filtra('rota_antecedencia'))
-
-    # ── Aba Histórico ─────────────────────────────────────────────
-    df_alteracoes = _reshape_alteracoes(filtra('precificacao'))
+    # Aplicação dos reshapes exatos
+    df_geral      = _pivot_resultado(df_geral_raw)
+    df_dia        = _pivot_resultado_dia(df_dia_raw)
+    df_rota       = _reshape_antecedencia(df_rota_raw)
+    df_reg_geral  = _pivot_regional_geral(df_reg_geral_raw)
+    df_reg_dia    = pd.DataFrame()  # não usado pelas abas
+    df_reg_rota   = _reshape_regional_rota(df_reg_rota_raw)
+    df_alteracoes = _reshape_alteracoes(df_alteracoes_raw)
 
     return df_geral, df_dia, df_rota, df_reg_geral, df_reg_dia, df_reg_rota, df_alteracoes
 
@@ -151,23 +144,14 @@ def split_dataframes(df: pd.DataFrame):
 # ── helpers de reshape ────────────────────────────────────────────────────────
 
 def _pivot_resultado(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Transforma linhas do CSV unificado (consolidado) no formato que
-    aba_resultados.render_resultados espera: colunas [metrica, julho_2025, atual].
-    """
-    if df.empty:
-        return df
+    if df.empty: return df
     out = df[['metrica', 'valor_historico', 'valor_atual']].copy()
     out.rename(columns={'valor_historico': 'julho_2025', 'valor_atual': 'atual'}, inplace=True)
     return out
 
 
 def _pivot_resultado_dia(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Mesmo pivot que _pivot_resultado, mas inclui coluna 'data' (data_atual).
-    """
-    if df.empty:
-        return df
+    if df.empty: return df
     cols = ['data_atual', 'metrica', 'valor_historico', 'valor_atual']
     cols_ok = [c for c in cols if c in df.columns]
     out = df[cols_ok].copy()
@@ -180,51 +164,21 @@ def _pivot_resultado_dia(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _reshape_antecedencia(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Transforma o bloco rota_antecedencia no formato esperado por
-    aba_antecedencia.render_rota_antecedencia:
-    colunas: data, rota_principal, sentido, antecedencia,
-             pax_atual, pax_julho25, lf_atual, lf_julho25,
-             yield_atual, yield_julho25, ticket_medio_atual, ticket_medio_julho25
-    """
-    if df.empty:
-        return df
-
+    if df.empty: return df
     col_map = {
-        'data_atual': 'data',
+        'data_julho_2026': 'data', # ← O Databricks exporta com este nome
         'eixo_sentido': 'sentido',
-        'pax_atual': 'pax_atual',
         'pax_historico': 'pax_julho25',
-        'lf_atual': 'lf_atual',
         'lf_historico': 'lf_julho25',
-        'yield_atual': 'yield_atual',
         'yield_historico': 'yield_julho25',
-        'ticket_medio_atual': 'ticket_medio_atual',
-        'ticket_medio_historico': 'ticket_medio_julho25',
-        'grupos_atual': 'grupos_atual',
-        'grupos_historico': 'grupos_historico',
-        'gmv_atual': 'gmv_atual',
+        'ticket_medio_historico': 'ticket_medio_julho25'
     }
     out = df.rename(columns={k: v for k, v in col_map.items() if k in df.columns})
-
-    # aba_antecedencia usa sufixo 'julho25' no rename_mapping
-    out.rename(columns={
-        'pax_julho25': 'pax_julho25',
-        'lf_julho25': 'lf_julho25',
-        'yield_julho25': 'yield_julho25',
-        'ticket_medio_julho25': 'ticket_medio_julho25',
-    }, inplace=True)
-
     return out
 
 
 def _pivot_regional_geral(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Transforma bloco regional_slot no formato esperado por aba_regionais:
-    colunas: regional, slot, metrica, julho_2025, atual
-    """
-    if df.empty:
-        return df
+    if df.empty: return df
     cols = ['regional', 'slot', 'metrica', 'valor_historico', 'valor_atual']
     cols_ok = [c for c in cols if c in df.columns]
     out = df[cols_ok].copy()
@@ -233,40 +187,19 @@ def _pivot_regional_geral(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _reshape_regional_rota(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Filtra apenas linhas com regional preenchido (regional_slot tem regional/slot)
-    e retorna no formato esperado por aba_regionais para detalhamento por rota.
-    """
-    if df.empty:
-        return df
-    if 'regional' not in df.columns:
-        return df
-    out = df[df['regional'].notna()].copy()
+    if df.empty: return df
     col_map = {
-        'data_atual': 'data',
-        'eixo_sentido': 'sentido',
-        'pax_atual': 'pax_atual',
-        'grupos_atual': 'grupos_atual',
-        'ticket_medio_atual': 'ticket_medio_atual',
-        'lf_atual': 'lf_atual',
-        'gmv_atual': 'gmv_atual',
+        'eixo_sentido': 'sentido'
+        # Nota: 'data' já vem com o nome correto do Databricks na query_regional_rota
     }
-    out.rename(columns={k: v for k, v in col_map.items() if k in out.columns}, inplace=True)
+    out = df.rename(columns={k: v for k, v in col_map.items() if k in df.columns})
     return out
 
 
 def _reshape_alteracoes(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Retorna o bloco de precificação no formato esperado por aba_historico.
-    """
-    if df.empty:
-        return df
-    col_map = {
-        'data_atual': 'data',
-        'eixo_sentido': 'sentido',
-    }
-    out = df.rename(columns={k: v for k, v in col_map.items() if k in df.columns})
-    return out
+    # Retorna o df puro porque a aba_historico.py já faz a inteligência de procurar
+    # as colunas com os nomes nativos do Databricks ('data_atual' e 'sentido').
+    return df
 
 
 # ==========================================
