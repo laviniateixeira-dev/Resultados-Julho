@@ -19,16 +19,19 @@ feriado_atual = "julho_2026"
 data_ancora_ida = "2026-07-03"    # Sexta-feira
 data_ancora_volta = "2026-07-26"  # Domingo
 
+# ==========================================
 # LINKS DO GITHUB EXATOS CONFORME O DATABRICKS
-GITHUB_RAW_GERAL      = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_geral_julho_2026_resultados.csv"
-GITHUB_RAW_DIA        = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_dia_julho_2026_resultados.csv"
-GITHUB_RAW_ROTA       = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_rota_antecedencia_julho_2026_resultados.csv"
-GITHUB_RAW_ALTERACOES = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/alteracoes_julho_2026_resultados.csv"
+# ==========================================
+
+GITHUB_RAW_GERAL      = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_geral_julho_2026.csv"
+GITHUB_RAW_DIA        = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_dia_julho_2026.csv"
+GITHUB_RAW_ROTA       = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_rota_antecedencia_julho_2026.csv"
+GITHUB_RAW_ALTERACOES = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/alteracoes_julho_2026.csv"
 
 # LINKS REGIONAIS EXATOS NO APP.PY
-GITHUB_RAW_REG_GERAL  = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_regional_geral_julho_2026_resultados.csv"
-GITHUB_RAW_REG_DIA    = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_regional_dia_julho_2026_resultados.csv"
-GITHUB_RAW_REG_ROTA   = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_regional_rota_julho_2026_resultados.csv"
+GITHUB_RAW_REG_GERAL  = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_regional_geral_julho_2026.csv"
+GITHUB_RAW_REG_DIA    = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_regional_dia_julho_2026.csv"
+GITHUB_RAW_REG_ROTA   = "https://raw.githubusercontent.com/laviniateixeira-dev/Resultados-Julho/main/data/resultados_regional_rota_julho_2026.csv"
 # ==========================================
 
 st.set_page_config(
