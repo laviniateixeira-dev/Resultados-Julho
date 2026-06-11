@@ -5,7 +5,7 @@ import io
 
 # Importando os arquivos de abas
 import aba_resultados
-import aba_regionais  # Nova aba conectada
+import aba_regionais  
 import aba_antecedencia
 import aba_historico
 
@@ -13,6 +13,7 @@ import aba_historico
 # CONFIGURAÇÕES DO FERIADO E LINKS
 # ==========================================
 feriado_atual = "julho_2026"
+LBL = "julho_2026_resultados" # Label exato gerado pelo Databricks
 
 # DATAS ÂNCORA PARA A ABA DE RESULTADOS
 data_ancora_ida = "2026-07-03"    # Sexta-feira
@@ -20,26 +21,27 @@ data_ancora_volta = "2026-07-26"  # Domingo
 
 # Nome exato do repositório onde os dados de Julho foram salvos
 NOME_REPO = "Resultados-Julho"
+BASE_URL = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data"
 
-# LINKS DO GITHUB PADRONIZADOS
-GITHUB_RAW_CURVA = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data/curva_{feriado_atual}.csv"
-GITHUB_RAW_GERAL = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data/resultados_geral_{feriado_atual}.csv"
-GITHUB_RAW_DIA = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data/resultados_dia_{feriado_atual}.csv"
-GITHUB_RAW_ROTA = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data/resultados_rota_antecedencia_{feriado_atual}.csv"
+# LINKS DO GITHUB PADRONIZADOS COM O DATABRICKS
+GITHUB_RAW_GERAL      = f"{BASE_URL}/resultados_geral_{LBL}.csv"
+GITHUB_RAW_DIA        = f"{BASE_URL}/resultados_dia_{LBL}.csv"
+GITHUB_RAW_ROTA       = f"{BASE_URL}/resultados_rota_antecedencia_{LBL}.csv"
+GITHUB_RAW_ALTERACOES = f"{BASE_URL}/alteracoes_{LBL}.csv"
 
-# LINKS REGIONAIS DO SEU DATABRICKS
-GITHUB_RAW_REG_GERAL = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data/resultados_regional_geral_{feriado_atual}.csv"
-GITHUB_RAW_REG_DIA = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data/resultados_regional_dia_{feriado_atual}.csv"
-GITHUB_RAW_REG_ROTA = f"https://raw.githubusercontent.com/laviniateixeira-dev/{NOME_REPO}/main/data/resultados_regional_rota_{feriado_atual}.csv"
+# LINKS REGIONAIS
+GITHUB_RAW_REG_GERAL  = f"{BASE_URL}/resultados_regional_geral_{LBL}.csv"
+GITHUB_RAW_REG_DIA    = f"{BASE_URL}/resultados_regional_dia_{LBL}.csv"
+GITHUB_RAW_REG_ROTA   = f"{BASE_URL}/resultados_regional_rota_{LBL}.csv"
 # ==========================================
 
 st.set_page_config(
-    page_title="Pricing · Julho", # Atualizei o título da aba do navegador também!
+    page_title="Pricing · Julho", 
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# --- PALETA CUSTOMIZADA: PRETO, GRAFITE & ROSA BUSER ---
+# --- PALETA CUSTOMIZADA ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
@@ -122,7 +124,7 @@ with st.sidebar:
         st.rerun()
 
     # Carregamento das bases globais
-    df_curva_raw = load_data(GITHUB_RAW_CURVA)
+    df_alteracoes_raw = load_data(GITHUB_RAW_ALTERACOES)
     df_geral_raw = load_data(GITHUB_RAW_GERAL)
     df_dia_raw = load_data(GITHUB_RAW_DIA)
     df_rota_raw = load_data(GITHUB_RAW_ROTA)
@@ -151,4 +153,4 @@ with tab3:
     aba_antecedencia.render_rota_antecedencia(df_rota_raw)
 
 with tab4: 
-    aba_historico.render_historico(df_curva_raw)
+    aba_historico.render_historico(df_alteracoes_raw)
